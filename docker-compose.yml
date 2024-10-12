@@ -1,0 +1,57 @@
+version: "3"
+
+volumes:
+  es-data:
+
+services:
+  elasticsearch:
+    image: bitnami/elasticsearch:8.15.2
+    container_name: elasticsearch
+    restart: unless-stopped
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - 'es-data:/bitnami/elasticsearch/data:Z'
+
+  kibana:
+    image: bitnami/kibana:8.15.2
+    container_name: kibana
+    restart: unless-stopped
+    volumes:
+      - './kibana.yml:/opt/bitnami/kibana/config/kibana.yml:Z'
+    ports:
+      - '5601:5601'
+    depends_on:
+      - elasticsearch
+
+#  logstash:
+#    image: bitnami/logstash:8.15.2
+#    container_name: logstash
+#    restart: unless-stopped
+#    ports:
+#      - '5044:5044'
+#    volumes:
+#      - './logstash/pipeline:/opt/bitnami/logstash/pipeline:Z'
+#    environment:
+#      - ELASTICSEARCH_HOST=elasticsearch
+#      - ELASTICSEARCH_PORT=9200
+#    depends_on:
+#      - elasticsearch
+#
+#  filebeat:
+#    image: bitnami/filebeat:8.15.2
+#    container_name: filebeat
+#    restart: unless-stopped
+#    volumes:
+#      - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
+#      - '/var/run/docker.sock:/var/run/docker.sock'
+#      - './filebeat/filebeat.yml:/opt/bitnami/filebeat/conf/filebeat.yml:Z'
+#    environment:
+#      - ELASTICSEARCH_HOST=elasticsearch
+#      - ELASTICSEARCH_PORT=9200
+#    depends_on:
+#      - elasticsearch
+
+
+ 
