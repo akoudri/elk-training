@@ -1,0 +1,34 @@
+GET /titanic/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "sex": "male"
+          }
+        },
+        {
+          "range": {
+            "age": {
+              "lt": 18
+            }
+          }
+        }
+      ]
+    }
+  }, 
+  "aggs": {
+    "age-stats": {
+      "stats": {
+        "field": "age"
+      }
+    },
+    "fare-stats": {
+      "stats": {
+        "field": "fare"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+GET _cat/indices?v
+
+PUT /persons/_doc/1
+{ "firstname": "Ali", "lastname": "Koudri", "age": 37 }
+
+GET /persons/_doc/1
+
+POST /persons/_doc/1
+{ "firstname": "Ali", "lastname": "Koudri", "age": 48 }
+
+POST /temps/_doc/1/_update​
+
+{​
+
+  "doc": {​
+
+    "cat": "regular"​
+
+  }​
+
+}
+
+POST /temps/_doc/1/_update
+{
+  "script" : {
+    "source": "ctx._source.paris += params.err",
+    "params": {
+      "err": 2
+    }
+  }
+}
+
+POST /temps/_delete_by_query
+{
+  "query": {
+    "range": {
+      "paris": {
+        "lte": 0
+      }
+    }
+  }
+}
+
+//TODO: voir pourquoi cette requête ne fonctionne pas
+POST /temps/_update_by_query
+{
+  "query": {
+    "match_all": {}
+  },
+  "script": {
+    "source": "ctx._source.cat = 'regular'",
+    "lang": "painless"
+  }
+}
+
