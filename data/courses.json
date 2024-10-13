@@ -1,0 +1,196 @@
+[
+  {
+    "name": "Accounting",
+    "room": "E3",
+    "professor": {
+      "name": "Tony Bayle",
+      "department": "finance",
+      "facutly_type": "part-time",
+      "email": "bayle@training.com"
+    },
+    "students_enrolled": 27,
+    "course_publish_date": "2015-01-19",
+    "course_description": "Act 101 is a course from the business school on the introduction to accounting that teaches students how to read and compose basic financial statements"
+  },
+  {
+    "name": "Marketing",
+    "room": "B1",
+    "professor": {
+      "name": "Jennifer Wiley",
+      "department": "business",
+      "facutly_type": "full-time",
+      "email": "wileyj@training.com"
+    },
+    "students_enrolled": 18,
+    "course_publish_date": "2017-06-02",
+    "course_description": "Mkt 101 introduces students to the fundamental concepts of marketing, including market research, product development, pricing strategies, and promotional techniques"
+  },
+  {
+    "name": "Computer Science and Technology",
+    "room": "C2",
+    "professor": {
+      "name": "Michael Johnson",
+      "department": "engineering",
+      "facutly_type": "full-time",
+      "email": "johnsonm@training.com"
+    },
+    "students_enrolled": 34,
+    "course_publish_date": "2016-03-08",
+    "course_description": "CS 101 is an introductory course that covers the basics of programming, algorithms, and data structures using Python programming language"
+  },
+  {
+    "name": "Psychology",
+    "room": "D4",
+    "professor": {
+      "name": "Emily Davis",
+      "department": "social sciences",
+      "facutly_type": "part-time",
+      "email": "davise@training.com"
+    },
+    "students_enrolled": 22,
+    "course_publish_date": "2018-09-15",
+    "course_description": "Psy 101 is an introductory course that explores the fundamental concepts of psychology, including human behavior, cognition, and development"
+  },
+  {
+    "name": "Biology",
+    "room": "A2",
+    "professor": {
+      "name": "David Wilson",
+      "department": "natural sciences",
+      "facutly_type": "full-time",
+      "email": "wilsond@training.com"
+    },
+    "students_enrolled": 29,
+    "course_publish_date": "2014-11-10",
+    "course_description": "Bio 101 is an introductory course that covers the basic principles of biology, including cell structure, genetics, evolution, and ecology"
+  },
+  {
+    "name": "Financial Management",
+    "room": "E5",
+    "professor": {
+      "name": "Sarah Thompson",
+      "department": "finance",
+      "facutly_type": "full-time",
+      "email": "thompsons@training.com"
+    },
+    "students_enrolled": 31,
+    "course_publish_date": "2016-02-27",
+    "course_description": "FM 201 is an advanced course that focuses on the principles of financial management, including investment analysis, capital budgeting, and risk management"
+  },
+  {
+    "name": "Data Structures",
+    "room": "C4",
+    "professor": {
+      "name": "Robert Patel",
+      "department": "engineering",
+      "facutly_type": "full-time",
+      "email": "patelr@training.com"
+    },
+    "students_enrolled": 28,
+    "course_publish_date": "2017-09-12",
+    "course_description": "CS 201 is an intermediate course that covers advanced topics in data structures, including trees, graphs, and hash tables, using Java programming language"
+  },
+  {
+    "name": "Organic Chemistry",
+    "room": "A5",
+    "professor": {
+      "name": "Laura Martinez",
+      "department": "natural sciences",
+      "facutly_type": "part-time",
+      "email": "martinezl@training.com"
+    },
+    "students_enrolled": 25,
+    "course_publish_date": "2015-07-08",
+    "course_description": "Chem 201 is an intermediate course that focuses on the study of organic compounds, their structures, properties, and reactions"
+  },
+  {
+    "name": "Consumer Behavior",
+    "room": "B3",
+    "professor": {
+      "name": "Daniel Brown",
+      "department": "business",
+      "facutly_type": "full-time",
+      "email": "brownd@training.com"
+    },
+    "students_enrolled": 20,
+    "course_publish_date": "2018-04-03",
+    "course_description": "Mkt 301 is an advanced course that explores the psychological and sociological factors that influence consumer behavior and decision-making processes"
+  },
+  {
+    "name": "Social Psychology",
+    "room": "D2",
+    "professor": {
+      "name": "Olivia Wilson",
+      "department": "social sciences",
+      "facutly_type": "full-time",
+      "email": "wilsono@training.com"
+    },
+    "students_enrolled": 26,
+    "course_publish_date": "2019-01-17",
+    "course_description": "Psy 301 is an advanced course that examines how individuals think, feel, and behave in social situations and how social influences shape human behavior"
+  },
+  {
+    "name": "Accounting",
+    "room": "E7",
+    "professor": {
+      "name": "Michael Chen",
+      "department": "business",
+      "facutly_type": "part-time",
+      "email": "chenm@training.com"
+    },
+    "students_enrolled": 24,
+    "course_publish_date": "2017-03-14",
+    "course_description": "Act 201 is an intermediate course that builds upon the concepts learned in Act 101, focusing on financial statement analysis and managerial accounting"
+  },
+  {
+    "name": "Marketing",
+    "room": "B5",
+    "professor": {
+      "name": "Jessica Lee",
+      "department": "business",
+      "facutly_type": "full-time",
+      "email": "leej@training.com"
+    },
+    "students_enrolled": 19,
+    "course_publish_date": "2016-08-29",
+    "course_description": "Mkt 201 is an intermediate course that delves deeper into marketing strategies, brand management, and digital marketing techniques"
+  },
+  {
+    "name": "Computer Science",
+    "room": "C6",
+    "professor": {
+      "name": "Andrew Nguyen",
+      "department": "computing",
+      "facutly_type": "full-time",
+      "email": "nguyena@training.com"
+    },
+    "students_enrolled": 32,
+    "course_publish_date": "2015-05-11",
+    "course_description": "CS 301 is an advanced course that covers topics such as artificial intelligence, machine learning, and natural language processing using Python"
+  },
+  {
+    "name": "Biology",
+    "room": "A8",
+    "professor": {
+      "name": "Samantha Patel",
+      "department": "natural sciences",
+      "facutly_type": "part-time"
+    },
+    "students_enrolled": 27,
+    "course_publish_date": "2018-11-06",
+    "course_description": "Bio 201 is an intermediate course that explores topics such as molecular biology, microbiology, and biotechnology"
+  },
+  {
+    "name": "Psychology",
+    "room": "D6",
+    "professor": {
+      "name": "William Davis",
+      "department": "social sciences",
+      "facutly_type": "full-time",
+      "email": "davisw@training.com"
+    },
+    "students_enrolled": 23,
+    "course_publish_date": "2019-02-18",
+    "course_description": "Psy 201 is an intermediate course that covers topics such as personality psychology, abnormal psychology, and research methods in psychology"
+  }
+]
