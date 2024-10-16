@@ -1,0 +1,9 @@
+GET /shakespeare/_search
+{
+  "query": {
+    "match": {
+      "text_entry": "love"
+    }
+  }
+}
+

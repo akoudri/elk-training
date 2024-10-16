@@ -1,0 +1,31 @@
+PUT _template/temperatures
+{
+  "index_patterns": ["temperatures_*"],
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "dt": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      },
+      "AverageTemperature": {
+        "type": "float"
+      },
+      "AverageTemperatureUncertainty": {
+        "type": "float"
+      },
+      "City": {
+        "type": "keyword"
+      },
+      "Country": {
+        "type": "keyword"
+      },
+      "location": {
+        "type": "geo_point"
+      }
+    }
+  }
+}
