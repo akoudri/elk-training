@@ -6,6 +6,7 @@ import sys
 def csv_to_json(csv_file_path, json_file_path):
     # Read the CSV file
     df = pd.read_csv(csv_file_path)
+    df.dropna(axis=0, inplace=True)
 
     # Convert the dataframe to a list of dictionaries
     records = df.to_dict(orient='records')
