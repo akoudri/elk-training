@@ -2,9 +2,6 @@ PUT /temoeratures
 {
   "mappings": {
     "properties": {
-      "location": {
-        "type": "geo_point"
-      },
       "dt": {
         "type": "date",
         "format": "yyyy-MM-dd"
@@ -20,6 +17,9 @@ PUT /temoeratures
       },
       "Country": {
         "type": "keyword"
+      },
+      "location": {
+        "type": "geo_point"
       }
     }
   }
