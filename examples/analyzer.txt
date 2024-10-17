@@ -1,0 +1,37 @@
+# Custom Tokenizer
+PUT _ingest/pipeline/my_custom_tokenizer
+{
+  "description": "My custom tokenizer",
+  "processors": [
+    {
+      "set": {
+        "field": "_source.my_tokenizer",
+        "value": {
+          "type": "pattern",
+          "pattern": ","
+        }
+      }
+    }
+  ]
+}
+
+# Custom Analyzer
+PUT _ingest/pipeline/my_custom_analyzer
+{
+  "description": "My custom analyzer",
+  "processors": [
+    {
+      "set": {
+        "field": "_source.my_analyzer",
+        "value": {
+          "type": "custom",
+          "tokenizer": "my_tokenizer",
+          "filter": [
+            "lowercase",
+            "my_filter"
+          ]
+        }
+      }
+    }
+  ]
+}
