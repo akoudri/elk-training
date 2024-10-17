@@ -1,4 +1,4 @@
-PUT /temoeratures
+PUT /temperatures
 {
   "mappings": {
     "properties": {
