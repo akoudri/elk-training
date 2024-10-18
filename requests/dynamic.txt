@@ -1,6 +1,11 @@
 POST /persons/_doc/1
 {
   "name": "John Doe",
+  "address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "zip": 10001
+  },
   "street": "123 Main St",
   "city": "New York",
   "zip": 10001
