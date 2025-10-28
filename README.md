@@ -28,6 +28,7 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 - **Snapshot & Restore API** for backup and disaster recovery
 - **TLS/SSL encryption** (secured version)
 - **Role-based access control** (secured version)
+- **Nginx log pipeline** - complete log flow demo (Nginx → Filebeat → Logstash → Elasticsearch)
 - Sample datasets and query examples
 - Python utilities for data ingestion
 
@@ -107,9 +108,48 @@ Or use bulk loading for larger datasets:
 python pushBulk.py data/shakespeare.ndjson shakespeare http://localhost:9200
 ```
 
-### Test the Log Pipeline
+### Test the Nginx Log Pipeline
 
-1. Create a test log:
+The stack includes a complete Nginx log pipeline that automatically generates and processes web server logs.
+
+1. **Automatic log generation** starts immediately (log_generator service)
+
+2. **View logs in realtime:**
+   ```bash
+   # Watch nginx access logs
+   docker exec nginx tail -f /var/log/nginx/access.log
+
+   # Watch Filebeat collecting logs
+   docker-compose logs -f filebeat | grep nginx
+
+   # Watch Logstash processing logs
+   docker-compose logs -f logstash | grep nginx
+   ```
+
+3. **Check data in Elasticsearch:**
+   ```bash
+   # View nginx indices
+   curl "http://localhost:9200/_cat/indices/nginx-logs-*?v"
+
+   # Count documents
+   curl "http://localhost:9200/nginx-logs-*/_count?pretty"
+
+   # View sample logs
+   curl "http://localhost:9200/nginx-logs-*/_search?pretty&size=2"
+   ```
+
+4. **Visualize in Kibana:**
+   - Open http://localhost:5601
+   - Go to Discover
+   - Create index pattern: `nginx-logs-*`
+   - Set time field: `@timestamp`
+   - Explore parsed and enriched logs with GeoIP and user agent data
+
+**See [NGINX-LOG-PIPELINE.md](NGINX-LOG-PIPELINE.md) for complete documentation.**
+
+### Test Other Log Inputs
+
+1. Create an application log:
    ```bash
    echo "$(date) - Application started" >> logs/app.log
    ```
@@ -122,8 +162,6 @@ python pushBulk.py data/shakespeare.ndjson shakespeare http://localhost:9200
    ```
 
 3. View in Kibana:
-   - Open http://localhost:5601
-   - Go to Discover
    - Create index pattern: `logstash-*`
 
 ## Services and Ports

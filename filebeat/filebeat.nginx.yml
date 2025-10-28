@@ -1,41 +1,35 @@
+# Filebeat configuration for Nginx log collection
+# This configuration reads Nginx access and error logs and sends them to Logstash
+
 filebeat.inputs:
-  # Nginx access and error logs
+  # Nginx access logs
   - type: log
     enabled: true
     paths:
       - /var/log/nginx/*.log
+      - /var/log/nginx/access.log
     fields:
       log_type: nginx
-      service: nginx
+      log_category: access
     fields_under_root: true
-    tags: ["nginx", "web"]
+    tags: ["nginx", "access"]
 
-  # Docker container logs
+  # Docker container logs (optional - keep existing functionality)
   - type: container
-    enabled: true
+    enabled: false
     paths:
       - '/var/lib/docker/containers/*/*.log'
     processors:
       - add_docker_metadata:
           host: "unix:///var/run/docker.sock"
 
-  # Application logs from the logs directory
+  # Application logs from the logs directory (optional - keep existing functionality)
   - type: log
-    enabled: true
+    enabled: false
     paths:
       - /var/log/app/*.log
     fields:
       log_type: application
-    fields_under_root: true
-
-  # System logs (if needed)
-  - type: log
-    enabled: false
-    paths:
-      - /var/log/syslog
-      - /var/log/auth.log
-    fields:
-      log_type: system
     fields_under_root: true
 
 # Processors to enrich events
@@ -44,32 +38,18 @@ processors:
       when.not.contains.tags: forwarded
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
-  - add_kubernetes_metadata: ~
 
-# Configure the output
+# Output to Logstash
 output.logstash:
   hosts: ["logstash:5044"]
 
-# Alternative: Direct to Elasticsearch (comment out logstash output above if using this)
+# Disable direct Elasticsearch output
 # output.elasticsearch:
 #   hosts: ["http://es01:9200", "http://es02:9200", "http://es03:9200"]
-#   indices:
-#     - index: "filebeat-docker-%{+yyyy.MM.dd}"
-#       when.equals:
-#         log_type: "docker"
-#     - index: "filebeat-app-%{+yyyy.MM.dd}"
-#       when.equals:
-#         log_type: "application"
-#     - index: "filebeat-%{+yyyy.MM.dd}"
 
-# Kibana configuration for setup
+# Kibana configuration for setup (optional)
 setup.kibana:
   host: "http://kibana:5601"
-
-# Setup template
-setup.template.settings:
-  index.number_of_shards: 1
-  index.number_of_replicas: 1
 
 # Logging configuration
 logging.level: info
@@ -79,3 +59,6 @@ logging.files:
   name: filebeat
   keepfiles: 7
   permissions: 0644
+
+# Filebeat monitors its own behavior
+monitoring.enabled: false
