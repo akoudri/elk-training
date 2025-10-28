@@ -2,6 +2,21 @@
 
 A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for learning and training purposes.
 
+## Two Deployment Options
+
+### 1. Unsecured (Easy Start - Learning)
+- No authentication required
+- No encryption
+- Quick setup for experimentation
+- **Use**: `docker-compose.yml`
+
+### 2. Secured (Production-Like - Training)
+- **Automatic TLS certificate generation**
+- Full authentication and encryption
+- Role-based access control (RBAC)
+- **Use**: `docker-compose.secured.yml`
+- **See**: [SECURED-SETUP.md](SECURED-SETUP.md) for details
+
 ## Features
 
 - **3-node Elasticsearch cluster** for learning cluster concepts
@@ -11,6 +26,8 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 - **Filebeat** for log collection
 - **MinIO** (S3-compatible storage) for snapshot/backup repository
 - **Snapshot & Restore API** for backup and disaster recovery
+- **TLS/SSL encryption** (secured version)
+- **Role-based access control** (secured version)
 - Sample datasets and query examples
 - Python utilities for data ingestion
 
@@ -25,7 +42,7 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
   sudo sysctl -w vm.max_map_count=262144
   ```
 
-### Start the Stack
+### Option A: Unsecured Stack (Easy Start)
 
 1. Start all services:
    ```bash
@@ -46,6 +63,32 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
    ```
    http://localhost:5601
    ```
+
+### Option B: Secured Stack (Recommended for Training)
+
+1. Configure passwords in `.env`:
+   ```bash
+   # Edit .env and set:
+   ELASTIC_PASSWORD=your_secure_password
+   KIBANA_PASSWORD=your_secure_password
+   ```
+
+2. Start the secured stack:
+   ```bash
+   ./start-secured.sh
+   ```
+
+3. Access services with authentication:
+   ```bash
+   # Elasticsearch (accept self-signed cert with -k)
+   curl -k -u elastic:your_password https://localhost:9200/_cluster/health?pretty
+
+   # Kibana (in browser)
+   https://localhost:5601
+   # Login: elastic / your_password
+   ```
+
+4. See [SECURED-SETUP.md](SECURED-SETUP.md) for complete documentation
 
 ### Load Sample Data
 
