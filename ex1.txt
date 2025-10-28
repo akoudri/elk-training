@@ -1,0 +1,39 @@
+Quels types de logs collecter ?
+
+Logs applicatifs métiers : requêtes, transactions, statuts, erreurs fonctionnelles par microservice.
+
+Logs techniques : logs d’accès HTTP, logs système, logs de l’orchestrateur Kubernetes (pods, nodes, scheduler…).
+
+Logs réseau/inter-microservices (REST, gRPC, events Kafka…).
+
+Quelles métriques suivre pour une vue globale et granulaire ?
+
+Métriques applicatives : temps de réponse, taux d’erreur par endpoint, nombre d’achats/abandons, top des produits recherchés.
+
+Métriques techniques : CPU, RAM, network, I/O des pods, nodes, namespace, latence des appels inter-services.
+
+Métriques du cluster Kubernetes : état des pods, autoscaling, déploiements, saturation nodes.
+
+Comment organiser la collecte sur Kubernetes ?
+
+Utilisation de DaemonSets pour déployer Filebeat/Metricbeat/Elastic Agent sur chaque node pour centraliser logs systèmes/Kubernetes et métriques pod/node.
+
+Injection de logs applicatifs dans stdout/stderr des conteneurs : Filebeat/Fluentd agrège et route vers Logstash ou directement Elasticsearch selon le besoin de parsing/contextualisation.
+
+Enrichissement des logs avec labels Kubernetes (namespace, pod, container, environnement), essentiel pour la corrélation multi-couche.
+
+Quelle articulation de la stack ELK ?
+
+Beats (Filebeat/Metricbeat/APM) sur chaque node ou pod : récolte, enrichit avec méta-données Kubernetes.
+
+Logstash (optionnel) : parsing complexe/filtres (ex : logs custom, correction timestamps, enrichissement métier).
+
+Elasticsearch : stockage indexé, permettant la recherche et l’agrégation rapide sur de très gros volumes.
+
+Kibana : création de dashboards transverses (visibilité globale cluster et microservices, corrélation incident métier/technique, alerting proactif).
+
+Quels indicateurs métiers ET techniques faut-il corréler pour le pilotage applicatif ?
+
+Indicateurs métier (CA, panier moyen, taux de conversion) associés par trace/ID aux métriques et logs techniques des appels correspondants (via tracing/labels/log enrichment).
+
+Exemples de scénarios : impact d’un pic de CPU sur le parcours d’achat ; analyse des causes profondes d’un taux d’erreur fournisseur de paiement ; compréhension des abandons de transaction suite à des latences identifiées sur des composants réseaux.

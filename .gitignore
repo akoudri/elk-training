@@ -1,1 +1,5 @@
 .idea/
+logs/*.log
+!logs/.gitkeep
+CLAUDE.md
+
