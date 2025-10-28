@@ -4,6 +4,7 @@ volumes:
   es-data01:
   es-data02:
   es-data03:
+  minio-data:
 
 networks:
   elastic:
@@ -17,11 +18,20 @@ services:
     command: >
       bash -c '
         echo "Waiting for Elasticsearch availability";
-        until curl -s http://es01:9200 | grep -q "missing authentication credentials"; do sleep 5; done;
-        echo "All done!";
+        until curl -s http://es01:9200 2>&1 | grep -q "tagline"; do sleep 5; done;
+        echo "Elasticsearch is available";
+
+        echo "Waiting for MinIO availability";
+        until curl -s http://minio:9000/minio/health/live 2>&1 | grep -q "200"; do sleep 5; done;
+        echo "MinIO is available";
+
+        echo "All services ready!";
       '
     networks:
       - elastic
+    depends_on:
+      minio:
+        condition: service_healthy
 
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
@@ -36,6 +46,8 @@ services:
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -66,6 +78,8 @@ services:
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -94,6 +108,8 @@ services:
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -174,3 +190,24 @@ services:
       es03:
         condition: service_healthy
     command: filebeat -e -strict.perms=false
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

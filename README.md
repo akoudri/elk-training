@@ -5,9 +5,12 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 ## Features
 
 - **3-node Elasticsearch cluster** for learning cluster concepts
+- **X-Pack monitoring enabled** for cluster health and performance metrics
 - **Kibana** for visualization and data exploration
 - **Logstash** with multiple input methods (Beats, TCP, HTTP)
 - **Filebeat** for log collection
+- **MinIO** (S3-compatible storage) for snapshot/backup repository
+- **Snapshot & Restore API** for backup and disaster recovery
 - Sample datasets and query examples
 - Python utilities for data ingestion
 
@@ -90,6 +93,8 @@ python pushBulk.py data/shakespeare.ndjson shakespeare http://localhost:9200
 | Logstash TCP | 5000 | TCP JSON input |
 | Logstash HTTP | 8080 | HTTP JSON input |
 | Logstash API | 9600 | Monitoring API |
+| MinIO API | 9000 | S3-compatible API |
+| MinIO Console | 9001 | Web management UI |
 
 ## Directory Structure
 
@@ -132,8 +137,51 @@ The `requests/` directory contains numerous query examples:
 - `es-crud.txt`: CRUD operations
 - `mappings.txt`: Index mapping definitions
 - `templates.txt`: Index template examples
+- `snapshots.txt`: Snapshot and restore operations
 
 Copy queries from these files into Kibana Dev Tools Console.
+
+## Snapshots and Backups
+
+### Setup Snapshot Repository (One-time)
+
+1. Install the S3 repository plugin:
+   ```bash
+   ./install-s3-plugin.sh
+   ```
+
+2. Configure the snapshot repository:
+   ```bash
+   ./setup-snapshot-repo.sh
+   ```
+
+### Create and Manage Snapshots
+
+Create a snapshot:
+```bash
+curl -X PUT "http://localhost:9200/_snapshot/my-snapshots/backup_1?wait_for_completion=true"
+```
+
+List snapshots:
+```bash
+curl "http://localhost:9200/_snapshot/my-snapshots/_all?pretty"
+```
+
+Restore a snapshot:
+```bash
+curl -X POST "http://localhost:9200/_snapshot/my-snapshots/backup_1/_restore"
+```
+
+Access MinIO Console at http://localhost:9001 (user: `minioadmin`, pass: `minioadmin123`)
+
+## Monitoring
+
+Access Stack Monitoring in Kibana:
+1. Open http://localhost:5601
+2. Go to **Management** → **Stack Monitoring**
+3. View cluster health, node metrics, and index statistics
+
+X-Pack monitoring is pre-configured and collects metrics automatically.
 
 ## Cluster Management
 
