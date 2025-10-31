@@ -1,7 +1,84 @@
-# Create admin role
-POST /_security/role/admin
+# Elasticsearch RBAC (Role-Based Access Control) Examples
+# Use these examples with the secured docker-compose setup
+# Replace YOUR_PASSWORD with actual passwords
+
+# ==============================================================================
+# AUTHENTICATION - Login and Check User
+# ==============================================================================
+
+# Check current user authentication
+GET _security/_authenticate
+
+# ==============================================================================
+# ROLES - Create Custom Roles
+# ==============================================================================
+
+# Create a read-only role for specific indices
+PUT _security/role/titanic_reader
 {
-  "cluster": ["all"],
+  "cluster": ["monitor"],
+  "indices": [
+    {
+      "names": ["titanic"],
+      "privileges": ["read", "view_index_metadata"]
+    }
+  ]
+}
+
+# Create a writer role for specific indices
+PUT _security/role/logs_writer
+{
+  "cluster": ["monitor"],
+  "indices": [
+    {
+      "names": ["logstash-*", "filebeat-*"],
+      "privileges": ["write", "create_index", "auto_configure"]
+    }
+  ]
+}
+
+# Create an analyst role with read access to multiple indices
+PUT _security/role/data_analyst
+{
+  "cluster": ["monitor", "monitor_snapshot"],
+  "indices": [
+    {
+      "names": ["titanic", "temperatures", "shakespeare"],
+      "privileges": ["read", "view_index_metadata"]
+    }
+  ],
+  "applications": [
+    {
+      "application": "kibana-.kibana",
+      "privileges": ["read"],
+      "resources": ["*"]
+    }
+  ]
+}
+
+# Create an admin role with full access to specific indices
+PUT _security/role/data_admin
+{
+  "cluster": ["monitor", "manage_index_templates", "monitor_snapshot"],
+  "indices": [
+    {
+      "names": ["titanic", "temperatures", "shakespeare", "logstash-*"],
+      "privileges": ["all"]
+    }
+  ],
+  "applications": [
+    {
+      "application": "kibana-.kibana",
+      "privileges": ["all"],
+      "resources": ["*"]
+    }
+  ]
+}
+
+# Create a backup role for snapshot management
+PUT _security/role/backup_operator
+{
+  "cluster": ["manage_slm", "cluster:admin/snapshot/*", "cluster:admin/repository/*"],
   "indices": [
     {
       "names": ["*"],
@@ -10,17 +87,327 @@ POST /_security/role/admin
   ]
 }
 
-# Create User
-POST /_security/user/john
+# Create a monitoring role
+PUT _security/role/monitoring_user
 {
-  "password" : "password123",
-  "roles" : [ "admin" ],
-  "full_name" : "John Doe"
+  "cluster": ["monitor"],
+  "indices": [
+    {
+      "names": [".monitoring-*"],
+      "privileges": ["read", "view_index_metadata"]
+    }
+  ],
+  "applications": [
+    {
+      "application": "kibana-.kibana",
+      "privileges": ["read"],
+      "resources": ["*"]
+    }
+  ]
 }
 
-# Role Mapping
-POST /_security/role_mapping/admin
+# ==============================================================================
+# USERS - Create Users with Roles
+# ==============================================================================
+
+# Create a read-only user for titanic data
+POST _security/user/titanic_user
 {
-  "roles": [ "admin" ],
-  "users": [ "john" ]
+  "password": "YOUR_PASSWORD",
+  "roles": ["titanic_reader"],
+  "full_name": "Titanic Reader",
+  "email": "titanic@example.com",
+  "metadata": {
+    "department": "analytics"
+  }
+}
+
+# Create a data analyst user
+POST _security/user/analyst
+{
+  "password": "YOUR_PASSWORD",
+  "roles": ["data_analyst", "kibana_user"],
+  "full_name": "Data Analyst",
+  "email": "analyst@example.com",
+  "metadata": {
+    "department": "analytics"
+  }
+}
+
+# Create an administrator user
+POST _security/user/admin
+{
+  "password": "YOUR_PASSWORD",
+  "roles": ["data_admin", "kibana_admin"],
+  "full_name": "Data Administrator",
+  "email": "admin@example.com",
+  "metadata": {
+    "department": "IT"
+  }
+}
+
+# Create a backup operator user
+POST _security/user/backup_user
+{
+  "password": "YOUR_PASSWORD",
+  "roles": ["backup_operator"],
+  "full_name": "Backup Operator",
+  "email": "backup@example.com",
+  "metadata": {
+    "department": "operations"
+  }
+}
+
+# Create a logs writer (for applications)
+POST _security/user/log_writer
+{
+  "password": "YOUR_PASSWORD",
+  "roles": ["logs_writer"],
+  "full_name": "Log Writer Service Account",
+  "email": "logs@example.com",
+  "metadata": {
+    "service": "application"
+  }
+}
+
+# Create a monitoring user
+POST _security/user/monitor
+{
+  "password": "YOUR_PASSWORD",
+  "roles": ["monitoring_user", "kibana_user"],
+  "full_name": "Monitoring User",
+  "email": "monitor@example.com"
+}
+
+# ==============================================================================
+# USER MANAGEMENT
+# ==============================================================================
+
+# List all users
+GET _security/user
+
+# Get specific user
+GET _security/user/analyst
+
+# Update user password
+POST _security/user/analyst/_password
+{
+  "password": "NEW_PASSWORD"
+}
+
+# Update user roles
+PUT _security/user/analyst
+{
+  "roles": ["data_analyst", "kibana_admin"],
+  "full_name": "Senior Data Analyst"
+}
+
+# Enable a disabled user
+PUT _security/user/analyst/_enable
+
+# Disable a user (without deleting)
+PUT _security/user/analyst/_disable
+
+# Delete a user
+DELETE _security/user/analyst
+
+# ==============================================================================
+# ROLE MANAGEMENT
+# ==============================================================================
+
+# List all roles
+GET _security/role
+
+# Get specific role
+GET _security/role/data_analyst
+
+# Delete a role
+DELETE _security/role/data_analyst
+
+# ==============================================================================
+# TESTING PERMISSIONS
+# ==============================================================================
+
+# Test if a user has specific privileges
+GET _security/user/_has_privileges
+{
+  "index": [
+    {
+      "names": ["titanic"],
+      "privileges": ["read", "write"]
+    }
+  ]
+}
+
+# Check what privileges a user has
+POST _security/user/_privileges
+
+# ==============================================================================
+# API KEYS - Alternative to User Credentials
+# ==============================================================================
+
+# Create an API key for programmatic access
+POST _security/api_key
+{
+  "name": "my-app-api-key",
+  "role_descriptors": {
+    "app-reader": {
+      "cluster": ["monitor"],
+      "indices": [
+        {
+          "names": ["titanic"],
+          "privileges": ["read"]
+        }
+      ]
+    }
+  },
+  "expiration": "30d",
+  "metadata": {
+    "application": "my-app",
+    "environment": "production"
+  }
+}
+
+# List API keys
+GET _security/api_key
+
+# Get specific API key
+GET _security/api_key?id=YOUR_KEY_ID
+
+# Invalidate an API key
+DELETE _security/api_key
+{
+  "id": "YOUR_KEY_ID"
+}
+
+# ==============================================================================
+# ADVANCED ROLE EXAMPLES
+# ==============================================================================
+
+# Role with field-level security (restrict visible fields)
+PUT _security/role/limited_analyst
+{
+  "indices": [
+    {
+      "names": ["titanic"],
+      "privileges": ["read"],
+      "field_security": {
+        "grant": ["name", "age", "sex", "survived"]
+      }
+    }
+  ]
+}
+
+# Role with document-level security (restrict visible documents)
+PUT _security/role/female_passengers_only
+{
+  "indices": [
+    {
+      "names": ["titanic"],
+      "privileges": ["read"],
+      "query": "{\"term\": {\"sex.keyword\": \"female\"}}"
+    }
+  ]
+}
+
+# Role with time-based access (using document-level security)
+PUT _security/role/recent_logs_only
+{
+  "indices": [
+    {
+      "names": ["logstash-*"],
+      "privileges": ["read"],
+      "query": "{\"range\": {\"@timestamp\": {\"gte\": \"now-7d\"}}}"
+    }
+  ]
+}
+
+# ==============================================================================
+# KIBANA SPACES AND ROLES
+# ==============================================================================
+
+# Create a role for specific Kibana space
+PUT _security/role/sales_team
+{
+  "cluster": ["monitor"],
+  "indices": [
+    {
+      "names": ["sales-*"],
+      "privileges": ["read", "view_index_metadata"]
+    }
+  ],
+  "applications": [
+    {
+      "application": "kibana-.kibana",
+      "privileges": ["feature_dashboard.read", "feature_discover.read"],
+      "resources": ["space:sales"]
+    }
+  ]
+}
+
+# ==============================================================================
+# TESTING SECURED ACCESS
+# ==============================================================================
+
+# Example: Test authentication with curl (from host machine)
+# curl -u elastic:YOUR_PASSWORD --cacert /path/to/ca.crt https://localhost:9200/_cluster/health?pretty
+
+# Example: Test with specific user
+# curl -u analyst:YOUR_PASSWORD --cacert /path/to/ca.crt https://localhost:9200/titanic/_search?pretty
+
+# Example: Test with API key
+# curl -H "Authorization: ApiKey YOUR_BASE64_ENCODED_KEY" --cacert /path/to/ca.crt https://localhost:9200/_cluster/health?pretty
+
+# ==============================================================================
+# COMMON BUILT-IN ROLES
+# ==============================================================================
+
+# superuser - Full access to everything
+# kibana_admin - Full access to Kibana
+# kibana_user - Basic Kibana access
+# monitoring_user - Read access to monitoring indices
+# ingest_admin - Manage ingest pipelines
+# logstash_admin - Manage Logstash indices
+# beats_admin - Manage Beats indices
+# remote_monitoring_agent - Remote monitoring collection
+# snapshot_user - View snapshot and restore status
+# viewer - Read-only access to indices
+
+# ==============================================================================
+# USEFUL QUERIES FOR RBAC AUDITING
+# ==============================================================================
+
+# Check all current user sessions
+GET _security/_authenticate
+
+# Audit log (if enabled) - check who did what
+GET .security-audit-*/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "@timestamp": "desc"
+    }
+  ]
+}
+
+# View all role mappings
+GET _security/role_mapping
+
+# ==============================================================================
+# PASSWORD POLICY
+# ==============================================================================
+
+# Change your own password
+POST _security/user/_password
+{
+  "password": "NEW_PASSWORD"
+}
+
+# Force password change for a user (as admin)
+POST _security/user/USERNAME/_password
+{
+  "password": "TEMPORARY_PASSWORD"
 }

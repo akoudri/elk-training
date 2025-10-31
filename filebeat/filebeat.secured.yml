@@ -1,0 +1,78 @@
+filebeat.inputs:
+  # Docker container logs
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+  # Application logs from the logs directory
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/app/*.log
+    fields:
+      log_type: application
+    fields_under_root: true
+
+  # System logs (if needed)
+  - type: log
+    enabled: false
+    paths:
+      - /var/log/syslog
+      - /var/log/auth.log
+    fields:
+      log_type: system
+    fields_under_root: true
+
+# Processors to enrich events
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+
+# Configure the output to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# Alternative: Direct to Elasticsearch with authentication and SSL
+# output.elasticsearch:
+#   hosts: ["https://es01:9200", "https://es02:9200", "https://es03:9200"]
+#   username: "elastic"
+#   password: "${ELASTICSEARCH_PASSWORD}"
+#   ssl:
+#     certificate_authorities: ["/usr/share/filebeat/config/certs/ca/ca.crt"]
+#   indices:
+#     - index: "filebeat-docker-%{+yyyy.MM.dd}"
+#       when.equals:
+#         log_type: "docker"
+#     - index: "filebeat-app-%{+yyyy.MM.dd}"
+#       when.equals:
+#         log_type: "application"
+#     - index: "filebeat-%{+yyyy.MM.dd}"
+
+# Kibana configuration for setup
+setup.kibana:
+  host: "https://kibana:5601"
+  username: "elastic"
+  password: "${ELASTICSEARCH_PASSWORD}"
+  ssl:
+    certificate_authorities: ["/usr/share/filebeat/config/certs/ca/ca.crt"]
+
+# Setup template
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 1
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644

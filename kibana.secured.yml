@@ -1,0 +1,41 @@
+server:
+  host: "0.0.0.0"
+  port: 5601
+  name: "kibana"
+  ssl:
+    enabled: true
+    certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
+    key: /usr/share/kibana/config/certs/kibana/kibana.key
+
+elasticsearch:
+  hosts: ["https://es01:9200", "https://es02:9200", "https://es03:9200"]
+  username: "kibana_system"
+  password: "${KIBANA_PASSWORD}"
+  ssl:
+    certificateAuthorities: ["/usr/share/kibana/config/certs/ca/ca.crt"]
+    verificationMode: certificate
+  requestTimeout: 30000
+  pingTimeout: 30000
+
+monitoring:
+  ui:
+    container:
+      elasticsearch:
+        enabled: true
+
+logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+  root:
+    level: info
+    appenders: [console]
+
+xpack:
+  security:
+    enabled: true
+    encryptionKey: "something_at_least_32_characters_long_for_encryption"
+  encryptedSavedObjects:
+    encryptionKey: "something_at_least_32_characters_long_for_saved_objects"

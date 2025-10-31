@@ -1,3 +1,8 @@
 .idea/
-*.pdf
+logs/*.log
+!logs/.gitkeep
+ca.crt
+*.key
+*.p12
+*.jks
 

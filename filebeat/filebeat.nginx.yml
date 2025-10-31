@@ -1,0 +1,64 @@
+# Filebeat configuration for Nginx log collection
+# This configuration reads Nginx access and error logs and sends them to Logstash
+
+filebeat.inputs:
+  # Nginx access logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/*.log
+      - /var/log/nginx/access.log
+    fields:
+      log_type: nginx
+      log_category: access
+    fields_under_root: true
+    tags: ["nginx", "access"]
+
+  # Docker container logs (optional - keep existing functionality)
+  - type: container
+    enabled: false
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+  # Application logs from the logs directory (optional - keep existing functionality)
+  - type: log
+    enabled: false
+    paths:
+      - /var/log/app/*.log
+    fields:
+      log_type: application
+    fields_under_root: true
+
+# Processors to enrich events
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# Output to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# Disable direct Elasticsearch output
+# output.elasticsearch:
+#   hosts: ["http://es01:9200", "http://es02:9200", "http://es03:9200"]
+
+# Kibana configuration for setup (optional)
+setup.kibana:
+  host: "http://kibana:5601"
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Filebeat monitors its own behavior
+monitoring.enabled: false

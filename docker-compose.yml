@@ -1,57 +1,256 @@
-version: "3"
+version: "3.8"
 
 volumes:
-  es-data:
+  es-data01:
+  es-data02:
+  es-data03:
+  minio-data:
+  nginx_logs:
+
+networks:
+  elastic:
+    driver: bridge
 
 services:
-  elasticsearch:
-    image: bitnami/elasticsearch:8.15.2
-    container_name: elasticsearch
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: setup
+    user: "0"
+    command: >
+      bash -c '
+        echo "Waiting for Elasticsearch availability";
+        until curl -s http://es01:9200 2>&1 | grep -q "tagline"; do sleep 5; done;
+        echo "Elasticsearch is available";
+
+        echo "Waiting for MinIO availability";
+        until curl -s http://minio:9000/minio/health/live 2>&1 | grep -q "200"; do sleep 5; done;
+        echo "MinIO is available";
+
+        echo "All services ready!";
+      '
+    networks:
+      - elastic
+    depends_on:
+      minio:
+        condition: service_healthy
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es01
     restart: unless-stopped
-    ports:
-      - '9200:9200'
-      - '9300:9300'
+    environment:
+      - node.name=es01
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
-      - 'es-data:/bitnami/elasticsearch/data:Z'
+      - es-data01:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es02
+    restart: unless-stopped
+    environment:
+      - node.name=es02
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es03
+    restart: unless-stopped
+    environment:
+      - node.name=es03
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.monitoring.elasticsearch.collection.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data03:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   kibana:
-    image: bitnami/kibana:8.15.2
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     container_name: kibana
     restart: unless-stopped
     volumes:
-      - './kibana.yml:/opt/bitnami/kibana/config/kibana.yml:Z'
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
-      - '5601:5601'
+      - "5601:5601"
+    networks:
+      - elastic
     depends_on:
-      - elasticsearch
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-#  logstash:
-#    image: bitnami/logstash:8.15.2
-#    container_name: logstash
-#    restart: unless-stopped
-#    ports:
-#      - '5044:5044'
-#    volumes:
-#      - './logstash/pipeline:/opt/bitnami/logstash/pipeline:Z'
-#    environment:
-#      - ELASTICSEARCH_HOST=elasticsearch
-#      - ELASTICSEARCH_PORT=9200
-#    depends_on:
-#      - elasticsearch
-#
-#  filebeat:
-#    image: bitnami/filebeat:8.15.2
-#    container_name: filebeat
-#    restart: unless-stopped
-#    volumes:
-#      - '/var/lib/docker/containers:/var/lib/docker/containers:ro'
-#      - '/var/run/docker.sock:/var/run/docker.sock'
-#      - './filebeat/filebeat.yml:/opt/bitnami/filebeat/conf/filebeat.yml:Z'
-#    environment:
-#      - ELASTICSEARCH_HOST=elasticsearch
-#      - ELASTICSEARCH_PORT=9200
-#    depends_on:
-#      - elasticsearch
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
+    container_name: logstash
+    restart: unless-stopped
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+    networks:
+      - elastic
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
+    container_name: filebeat
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs:/var/log/app:ro
+      - nginx_logs:/var/log/nginx:ro
+    networks:
+      - elastic
+    depends_on:
+      es01:
+        condition: service_healthy
+      es02:
+        condition: service_healthy
+      es03:
+        condition: service_healthy
+      logstash:
+        condition: service_started
+    command: filebeat -e -strict.perms=false
 
- 
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    volumes:
+      - nginx_logs:/var/log/nginx
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  log_generator:
+    image: alpine:latest
+    container_name: log_generator
+    restart: unless-stopped
+    command: >
+      sh -c '
+        apk add --no-cache curl;
+        echo "Log generator started. Sending requests to nginx every 3 seconds...";
+        while true; do
+          curl -s http://nginx/ > /dev/null;
+          curl -s http://nginx/index.html > /dev/null;
+          curl -s http://nginx/nonexistent.html > /dev/null;
+          curl -s http://nginx/api/users > /dev/null;
+          curl -s http://nginx/admin > /dev/null;
+          sleep 3;
+        done
+      '
+    networks:
+      - elastic
+    depends_on:
+      nginx:
+        condition: service_healthy
+      es01:
+        condition: service_healthy
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    networks:
+      - elastic
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
