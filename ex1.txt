@@ -6,6 +6,7 @@ Logs techniques : logs d’accès HTTP, logs système, logs de l’orchestrate
 
 Logs réseau/inter-microservices (REST, gRPC, events Kafka…).
 
+
 Quelles métriques suivre pour une vue globale et granulaire ?
 
 Métriques applicatives : temps de réponse, taux d’erreur par endpoint, nombre d’achats/abandons, top des produits recherchés.
@@ -14,6 +15,7 @@ Métriques techniques : CPU, RAM, network, I/O des pods, nodes, namespace, lat
 
 Métriques du cluster Kubernetes : état des pods, autoscaling, déploiements, saturation nodes.
 
+
 Comment organiser la collecte sur Kubernetes ?
 
 Utilisation de DaemonSets pour déployer Filebeat/Metricbeat/Elastic Agent sur chaque node pour centraliser logs systèmes/Kubernetes et métriques pod/node.
@@ -21,6 +23,7 @@ Utilisation de DaemonSets pour déployer Filebeat/Metricbeat/Elastic Agent sur c
 Injection de logs applicatifs dans stdout/stderr des conteneurs : Filebeat/Fluentd agrège et route vers Logstash ou directement Elasticsearch selon le besoin de parsing/contextualisation.
 
 Enrichissement des logs avec labels Kubernetes (namespace, pod, container, environnement), essentiel pour la corrélation multi-couche.
+
 
 Quelle articulation de la stack ELK ?
 
@@ -31,6 +34,7 @@ Logstash (optionnel) : parsing complexe/filtres (ex : logs custom, correctio
 Elasticsearch : stockage indexé, permettant la recherche et l’agrégation rapide sur de très gros volumes.
 
 Kibana : création de dashboards transverses (visibilité globale cluster et microservices, corrélation incident métier/technique, alerting proactif).
+
 
 Quels indicateurs métiers ET techniques faut-il corréler pour le pilotage applicatif ?
 
