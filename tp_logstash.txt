@@ -1,0 +1,37 @@
+C'est le cœur de l'activité. Demandez d'ouvrir logstash/pipeline/nginx.conf.
+
+Input :
+
+input { beats { port => 5044 } }
+
+Explication : Logstash ouvre le port 5044 et écoute les données venant de Filebeat.
+
+Filter (le plus important) :
+
+grok : "Comment je parse le log Nginx ?"
+
+match => { "message" => "%{NGINX_LOG}" }
+
+Explication : Le filtre grok utilise un pattern (NGINX_LOG) pour découper le champ message (le log brut) en champs structurés (ex: client_ip, response, verb...).
+
+geoip : "D'où vient cet utilisateur ?"
+
+source => "client_ip"
+
+Explication : Ce filtre prend le champ client_ip (créé par grok) et crée un nouvel objet geoip contenant le pays, la ville, et les coordonnées GPS. C'est de l'enrichissement.
+
+useragent : "Quel appareil utilise-t-il ?"
+
+source => "agent"
+
+Explication : Ce filtre prend le champ agent (le User-Agent string) et le découpe en useragent.os.name, useragent.device.name, etc. C'est un second enrichissement.
+
+date : "Quand ce log a-t-il vraiment eu lieu ?"
+
+Explication : Remplace le @timestamp (moment de l'ingestion) par la date réelle du log Nginx. Crucial pour l'analyse.
+
+Output :
+
+output { elasticsearch { hosts => "elasticsearch:9200" index => "logstash-nginx-%{+YYYY.MM.dd}" } }
+
+Explication : Envoie le document JSON (transformé et enrichi) vers Elasticsearch dans un index quotidien.

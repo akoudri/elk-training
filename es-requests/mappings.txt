@@ -1,0 +1,64 @@
+PUT /temperatures
+{
+  "mappings": {
+    "properties": {
+      "dt": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      },
+      "AverageTemperature": {
+        "type": "float"
+      },
+      "AverageTemperatureUncertainty": {
+        "type": "float"
+      },
+      "City": {
+        "type": "keyword"
+      },
+      "Country": {
+        "type": "keyword"
+      },
+      "location": {
+        "type": "geo_point"
+      }
+    }
+  }
+}
+
+PUT /shakespeare
+{
+  "mappings": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "line_id": {
+        "type": "integer"
+      },
+      "play_name": {
+        "type": "text",
+        "analyzer": "english"
+      },
+      "speech_number": {
+        "type": "integer"
+      },
+      "line_number": {
+        "type": "keyword"
+      },
+      "speaker": {
+        "type": "text",
+        "analyzer": "english"
+      },
+      "text_entry": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  }
+}

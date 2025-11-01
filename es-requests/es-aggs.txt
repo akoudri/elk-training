@@ -1,0 +1,88 @@
+GET /titanic/_search
+{
+  "size": 0,
+  "aggs": {
+    "sexe": {
+      "terms": {
+        "field": "sex.keyword"
+      }
+    }
+  }
+}
+
+GET /titanic/_search
+{
+  "size": 0,
+  "aggs": {
+    "sex": {
+      "terms": {
+        "field": "sex.keyword"
+      },
+      "aggs": {
+        "age_moyen": {
+          "avg": {
+            "field": "age"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET /titanic/_search
+{
+  "size": 0,
+  "aggs": {
+    "sex": {
+      "terms": {
+        "field": "sex.keyword"
+      },
+      "aggs": {
+        "age_moyen": {
+          "avg": {
+            "field": "age"
+          }
+        }
+      }
+    },
+    "classe": {
+      "terms": {
+        "field": "pclass"
+      }
+    }
+  }
+}
+
+GET /titanic/_search
+{
+  "size": 0,
+  "aggs": {
+    "ages": {
+      "histogram": {
+        "field": "age",
+        "interval": 5
+      }
+    }
+  }
+}
+
+GET /titanic/_search
+{
+  "size": 0,
+  "aggs": {
+    "pct_age": {
+      "percentiles": {
+        "field": "age",
+        "percents": [
+          1,
+          5,
+          25,
+          50,
+          75,
+          95,
+          99
+        ]
+      }
+    }
+  }
+}

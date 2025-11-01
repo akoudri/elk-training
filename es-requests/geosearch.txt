@@ -1,0 +1,46 @@
+GET /temperatures/_search
+{
+  "query": {
+    "geo_bounding_box": {
+      "location": {
+        "top_left": {
+          "lat": 6.0,
+          "lon": -4.0
+        },
+        "bottom_right": {
+          "lat": 5.0,
+          "lon": -3.0
+        }
+      }
+    }
+  }
+}
+
+GET /temperatures/_search
+{
+  "query": {
+    "geo_polygon": {
+      "location": {
+        "points": [
+          {"lat": 6.0, "lon": -4.0},
+          {"lat": 6.0, "lon": -3.0},
+          {"lat": 5.0, "lon": -3.0},
+          {"lat": 5.0, "lon": -4.0}
+        ]
+      }
+    }
+  }
+}
+
+GET /temperatures/_search
+{
+  "query": {
+    "geo_distance": {
+      "distance": "100km",
+      "location": {
+        "lat": 5.63,
+        "lon": -3.23
+      }
+    }
+  }
+}

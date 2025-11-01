@@ -1,0 +1,35 @@
+POST /persons/_doc/1
+{
+  "name": "John Doe",
+  "address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "zip": 10001
+  },
+  "street": "123 Main St",
+  "city": "New York",
+  "zip": 10001
+}
+
+GET /persons/_search
+{
+  "size": 5,
+  "query": {
+    "match_all": {}
+  },
+  "script_fields": {
+    "champs_concatenes": {
+      "script": {
+        "source": """
+          String resultat = '';
+          for (String champ : params._source.keySet()) {
+            if (params._source[champ] != null) {
+              resultat += params._source[champ].toString() + ' ';
+            }
+          }
+          return resultat;
+        """
+      }
+    }
+  }
+}
