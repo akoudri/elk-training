@@ -1,0 +1,23 @@
+#Création d'un rôle
+curl -k -u elastic:changeme -X PUT "https://localhost:9200/_security/role/titanic_reader" -H 'Content-Type: application/json' -d'
+{
+  "cluster": [
+    "monitor"
+  ],
+  "indices": [
+    {
+      "names": [ "titanic" ],
+      "privileges": [ "read" ]
+    }
+  ]
+}
+'
+
+#Création d'un utilisateur et assignation du rôle
+curl -k -u elastic:changeme -X PUT "https://localhost:9200/_security/user/analyste" -H 'Content-Type: application/json' -d'
+{
+  "password": "password123",
+  "roles": [ "titanic_reader" ],
+  "full_name": "Analyste Titanic"
+}
+'

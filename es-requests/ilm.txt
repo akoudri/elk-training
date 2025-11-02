@@ -1,0 +1,35 @@
+#Création de la politique
+PUT _ilm/policy/logs_appli_policy
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {}
+      },
+      "warm": {
+        "min_age": "7d",
+        "actions": {
+          "readonly": {}
+        }
+      },
+      "delete": {
+        "min_age": "30d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+
+#Applcation de la politique à un template d'index
+PUT _index_template/logs_appli_template
+{
+  "index_patterns": ["logs-appli-*"],
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "logs_appli_policy"
+    }
+  }
+}

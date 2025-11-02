@@ -1,0 +1,23 @@
+# Create repo
+PUT /_snapshot/minio_backup
+{
+  "type": "s3",
+  "settings": {
+    "bucket": "elk-backup",
+    "client": "default",
+    "endpoint": "http://minio:9000",
+    "protocol": "http",
+    "path_style_access": true
+  }
+}
+
+# sauvegarde des index 'temperatures'
+PUT _snapshot/minio_backup/snapshot_temps?wait_for_completion=true
+{
+  "indices": "temperatures",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}
+
+# restaurer les index 'temperatures'
+POST _snapshot/minio_backup/snapshot_temps/_restore
