@@ -7,6 +7,26 @@ set -e
 echo "=== Starting Secured ELK Stack ==="
 echo ""
 
+# Check vm.max_map_count (required for Elasticsearch)
+CURRENT_MAP_COUNT=$(sysctl -n vm.max_map_count 2>/dev/null || echo 0)
+REQUIRED_MAP_COUNT=262144
+
+if [ "$CURRENT_MAP_COUNT" -lt "$REQUIRED_MAP_COUNT" ]; then
+    echo "ERROR: vm.max_map_count is too low ($CURRENT_MAP_COUNT)"
+    echo "Elasticsearch requires vm.max_map_count to be at least $REQUIRED_MAP_COUNT"
+    echo ""
+    echo "To fix this, run:"
+    echo "  sudo sysctl -w vm.max_map_count=$REQUIRED_MAP_COUNT"
+    echo ""
+    echo "To make it permanent across reboots, add this line to /etc/sysctl.conf:"
+    echo "  vm.max_map_count=$REQUIRED_MAP_COUNT"
+    echo ""
+    exit 1
+fi
+
+echo "✓ vm.max_map_count is set correctly ($CURRENT_MAP_COUNT)"
+echo ""
+
 # Check if .env file exists
 if [ ! -f .env ]; then
     echo "ERROR: .env file not found!"
