@@ -21,3 +21,4 @@ curl -k -u elastic:changeme -X PUT "https://localhost:9200/_security/user/analys
   "full_name": "Analyste Titanic"
 }
 '
+
