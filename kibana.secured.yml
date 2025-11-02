@@ -35,7 +35,6 @@ logging:
 
 xpack:
   security:
-    enabled: true
     encryptionKey: "something_at_least_32_characters_long_for_encryption"
   encryptedSavedObjects:
     encryptionKey: "something_at_least_32_characters_long_for_saved_objects"
