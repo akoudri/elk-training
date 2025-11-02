@@ -131,3 +131,106 @@ GET /temperatures/_search
   }
 }
 
+#Trouvez toutes les stations météo situées dans la "péninsule ibérique" (approximativement l'Espagne et le Portugal).
+GET /temperatures/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "geo_bounding_box": {
+          "location": {
+            "top_left": { "lat": 44.0, "lon": -10.0 },
+            "bottom_right": { "lat": 36.0, "lon": 3.0 }
+          }
+        }
+      }
+    }
+  }
+}
+
+#Trouvez toutes les stations météo dans un rayon de 500km autour de Paris (France).
+GET /temperatures/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "geo_distance": {
+          "distance": "500km",
+          "location": {
+            "lat": 48.8566,
+            "lon": 2.3522
+          }
+        }
+      }
+    }
+  }
+}
+
+#Trouvez toutes les stations météo situées à l'intérieur d'un polygone qui dessine approximativement l'Italie.
+GET /temperatures/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "geo_polygon": {
+          "location": {
+            "points": [
+              { "lat": 47.0, "lon": 6.0 },  // Point au Nord-Ouest
+              { "lat": 47.0, "lon": 14.0 }, // Point au Nord-Est
+              { "lat": 42.0, "lon": 15.0 }, // Point sur la côte Est
+              { "lat": 38.0, "lon": 16.0 }, // Pointe de la "botte"
+              { "lat": 37.0, "lon": 12.0 }, // Sicile
+              { "lat": 41.0, "lon": 12.0 }, // Côte Ouest
+              { "lat": 47.0, "lon": 6.0 }   // Retour au point de départ
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+#Trouvez toutes les stations "tropicales" (température moyenne supérieure à 25°C) qui sont aussi situées dans un rayon de 1000km autour de Dakar (Sénégal).
+GET /temperatures/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "geo_distance": {
+            "distance": "1000km",
+            "location": {
+              "lat": 14.7167,
+              "lon": -17.4677
+            }
+          }
+        },
+        {
+          "range": {
+            "avg_temp_c": { "gte": 25 }
+          }
+        }
+      ]
+    }
+  }
+}
+
+#Combien de stations se trouvent dans les zones suivantes par rapport à Berlin (Allemagne) : "Proche" (0-500km), "Moyen" (500-2000km) et "Loin" (>2000km).
+GET /temperatures/_search
+{
+  "size": 0,
+  "aggs": {
+    "stations_par_distance": {
+      "geo_distance": {
+        "field": "location",
+        "origin": { "lat": 52.5200, "lon": 13.4050 },
+        "unit": "km",
+        "ranges": [
+          { "to": 500, "key": "Proche" },
+          { "from": 500, "to": 2000, "key": "Moyen" },
+          { "from": 2000, "key": "Loin" }
+        ]
+      }
+    }
+  }
+}
