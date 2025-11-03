@@ -5,12 +5,14 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 ## Two Deployment Options
 
 ### 1. Unsecured (Easy Start - Learning)
+
 - No authentication required
 - No encryption
 - Quick setup for experimentation
 - **Use**: `docker-compose.yml`
 
 ### 2. Secured (Production-Like - Training)
+
 - **Automatic TLS certificate generation**
 - Full authentication and encryption
 - Role-based access control (RBAC)
@@ -45,17 +47,26 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 
 ### Option A: Unsecured Stack (Easy Start)
 
+0. Set System Config
+
+```bash
+   sudo sysctl -w vm.max_map_count=262144
+```
+
 1. Start all services:
+
    ```bash
    docker-compose up -d
    ```
 
 2. Wait for services to be healthy (about 1-2 minutes):
+
    ```bash
    docker-compose ps
    ```
 
 3. Verify cluster is running:
+
    ```bash
    curl http://localhost:9200/_cluster/health?pretty
    ```
@@ -68,6 +79,7 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 ### Option B: Secured Stack (Recommended for Training)
 
 1. Configure passwords in `.env`:
+
    ```bash
    # Edit .env and set:
    ELASTIC_PASSWORD=your_secure_password
@@ -75,11 +87,13 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
    ```
 
 2. Start the secured stack:
+
    ```bash
    ./start-secured.sh
    ```
 
 3. Access services with authentication:
+
    ```bash
    # Elasticsearch (accept self-signed cert with -k)
    curl -k -u elastic:your_password https://localhost:9200/_cluster/health?pretty
@@ -94,16 +108,19 @@ A complete Elasticsearch, Logstash, Kibana, and Filebeat (ELK + Beats) stack for
 ### Load Sample Data
 
 Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 Load the Titanic dataset:
+
 ```bash
 python pushES.py data/titanic.json titanic http://localhost:9200
 ```
 
 Or use bulk loading for larger datasets:
+
 ```bash
 python pushBulk.py data/shakespeare.ndjson shakespeare http://localhost:9200
 ```
@@ -115,6 +132,7 @@ The stack includes a complete Nginx log pipeline that automatically generates an
 1. **Automatic log generation** starts immediately (log_generator service)
 
 2. **View logs in realtime:**
+
    ```bash
    # Watch nginx access logs
    docker exec nginx tail -f /var/log/nginx/access.log
@@ -127,6 +145,7 @@ The stack includes a complete Nginx log pipeline that automatically generates an
    ```
 
 3. **Check data in Elasticsearch:**
+
    ```bash
    # View nginx indices
    curl "http://localhost:9200/_cat/indices/nginx-logs-*?v"
@@ -150,11 +169,13 @@ The stack includes a complete Nginx log pipeline that automatically generates an
 ### Test Other Log Inputs
 
 1. Create an application log:
+
    ```bash
    echo "$(date) - Application started" >> logs/app.log
    ```
 
 2. Send a test event to Logstash:
+
    ```bash
    curl -X POST -H "Content-Type: application/json" \
      -d '{"message": "Test event", "level": "info"}' \
@@ -166,16 +187,16 @@ The stack includes a complete Nginx log pipeline that automatically generates an
 
 ## Services and Ports
 
-| Service | Port | Description |
-|---------|------|-------------|
-| Elasticsearch | 9200 | REST API (es01 node) |
-| Kibana | 5601 | Web interface |
-| Logstash Beats | 5044 | Beats input |
-| Logstash TCP | 5000 | TCP JSON input |
-| Logstash HTTP | 8080 | HTTP JSON input |
-| Logstash API | 9600 | Monitoring API |
-| MinIO API | 9000 | S3-compatible API |
-| MinIO Console | 9001 | Web management UI |
+| Service        | Port | Description          |
+| -------------- | ---- | -------------------- |
+| Elasticsearch  | 9200 | REST API (es01 node) |
+| Kibana         | 5601 | Web interface        |
+| Logstash Beats | 5044 | Beats input          |
+| Logstash TCP   | 5000 | TCP JSON input       |
+| Logstash HTTP  | 8080 | HTTP JSON input      |
+| Logstash API   | 9600 | Monitoring API       |
+| MinIO API      | 9000 | S3-compatible API    |
+| MinIO Console  | 9001 | Web management UI    |
 
 ## Directory Structure
 
@@ -227,6 +248,7 @@ Copy queries from these files into Kibana Dev Tools Console.
 ### Setup Snapshot Repository (One-time)
 
 1. Install the S3 repository plugin:
+
    ```bash
    ./install-s3-plugin.sh
    ```
@@ -239,16 +261,19 @@ Copy queries from these files into Kibana Dev Tools Console.
 ### Create and Manage Snapshots
 
 Create a snapshot:
+
 ```bash
 curl -X PUT "http://localhost:9200/_snapshot/my-snapshots/backup_1?wait_for_completion=true"
 ```
 
 List snapshots:
+
 ```bash
 curl "http://localhost:9200/_snapshot/my-snapshots/_all?pretty"
 ```
 
 Restore a snapshot:
+
 ```bash
 curl -X POST "http://localhost:9200/_snapshot/my-snapshots/backup_1/_restore"
 ```
@@ -258,6 +283,7 @@ Access MinIO Console at http://localhost:9001 (user: `minioadmin`, pass: `minioa
 ## Monitoring
 
 Access Stack Monitoring in Kibana:
+
 1. Open http://localhost:5601
 2. Go to **Management** → **Stack Monitoring**
 3. View cluster health, node metrics, and index statistics
@@ -267,26 +293,31 @@ X-Pack monitoring is pre-configured and collects metrics automatically.
 ## Cluster Management
 
 Check cluster health:
+
 ```bash
 curl http://localhost:9200/_cluster/health?pretty
 ```
 
 View all nodes:
+
 ```bash
 curl http://localhost:9200/_cat/nodes?v
 ```
 
 View indices:
+
 ```bash
 curl http://localhost:9200/_cat/indices?v
 ```
 
 Stop the stack:
+
 ```bash
 docker-compose down
 ```
 
 Remove all data:
+
 ```bash
 docker-compose down -v
 ```
@@ -294,12 +325,14 @@ docker-compose down -v
 ## Configuration
 
 The stack version is controlled in `.env`:
+
 ```bash
 STACK_VERSION=8.15.3
 CLUSTER_NAME=elk-training-cluster
 ```
 
 To change versions, update `.env` and restart:
+
 ```bash
 docker-compose down
 docker-compose up -d
@@ -308,6 +341,7 @@ docker-compose up -d
 ## Troubleshooting
 
 View service logs:
+
 ```bash
 docker-compose logs -f elasticsearch
 docker-compose logs -f kibana
